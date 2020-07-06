@@ -1,0 +1,9 @@
+D:\PROJEKTY\Podgląd zdjęć\photoviewer\bin\Debug\photoviewer.exe.config
+D:\PROJEKTY\Podgląd zdjęć\photoviewer\bin\Debug\photoviewer.exe
+D:\PROJEKTY\Podgląd zdjęć\photoviewer\bin\Debug\photoviewer.pdb
+D:\PROJEKTY\Podgląd zdjęć\photoviewer\obj\Debug\photoviewer.csprojAssemblyReference.cache
+D:\PROJEKTY\Podgląd zdjęć\photoviewer\obj\Debug\photoviewer.Form1.resources
+D:\PROJEKTY\Podgląd zdjęć\photoviewer\obj\Debug\photoviewer.Properties.Resources.resources
+D:\PROJEKTY\Podgląd zdjęć\photoviewer\obj\Debug\photoviewer.csproj.GenerateResource.cache
+D:\PROJEKTY\Podgląd zdjęć\photoviewer\obj\Debug\photoviewer.exe
+D:\PROJEKTY\Podgląd zdjęć\photoviewer\obj\Debug\photoviewer.pdb
