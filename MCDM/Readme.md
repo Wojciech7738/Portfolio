@@ -1,3 +1,4 @@
+# TOPSIS, PROMETHEE II and VIKOR MCDM methods
 The file "3in1.py" contains an implementation for three Multi-Criteria Decision Analisys methods:
 TOPSIS, PROMETHEE II and VIKOR. This program reads the decision matrix from Excel file and calculates
 rankings (which alternative is better then rest) using each method. 
@@ -10,7 +11,7 @@ You can execute application by following command:
 python 3in1.py <filename>
 
 Requirements:
-1) Python 3
+1) Python 3.X
 2) installed packages:
 - numpy
 - pandas
