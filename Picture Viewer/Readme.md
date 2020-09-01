@@ -1,6 +1,6 @@
 # Picture Viewer
 This directory contains ready-to-run application and source files of mentioned viewer. Application creates "colors.xml" 
-file in current directory to save the colors of the GUI. 
+file in its directory to save the colors of the GUI. 
 
 Functions:
 - possibility of changing the colors of the GUI
