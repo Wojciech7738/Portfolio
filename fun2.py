@@ -61,7 +61,7 @@ def extract_multiple_images(path, RGB=False, plot=False, use_prev_data=False):
 
 
 # Method which divides single image into windows
-def predict_single_image(classifier, imgPath, RGB=False, plot=False, plot_rect=False, proba=False):
+def predict_single_image(classifier, imgPath, rows=11, columns=14, RGB=False, plot=False, plot_rect=False, proba=False):
     # RGB - prediction for RGB-LBP method;  plot_rect - plot a rectangle on the current window's position;
     # proba - print probability instead of full prediction in plot's title
 
@@ -74,8 +74,9 @@ def predict_single_image(classifier, imgPath, RGB=False, plot=False, plot_rect=F
     # image_size is (300, 200), but the real one is REVERSED [cv2.resize function]
     img_size = image_size[::-1]
     percentage = 0.2 # percentage of cropped image relative to its original size
+    counter = 0.2 # is added in every loop iteration
     i=0
-    while percentage <= 1.0:
+    while percentage < 1.09:
         x = 0
         y = 0
         cr_img_size = (int(img_size[0]*percentage), int(img_size[1]*percentage))
@@ -86,7 +87,7 @@ def predict_single_image(classifier, imgPath, RGB=False, plot=False, plot_rect=F
             # Plot a rectangle
             if plot:
                 if not plot_rect:
-                    plt.subplot(11,14,i)
+                    plt.subplot(rows,columns,i)
                     plt.imshow(cropped_image)
                 else:
                     img_with_rectangle = cv2.rectangle(image, (y,x), (cr_img_size[1]+y,cr_img_size[0]+x), (255,int((percentage+0.4)*255),int((percentage+0.4)*255)),2)
@@ -99,14 +100,14 @@ def predict_single_image(classifier, imgPath, RGB=False, plot=False, plot_rect=F
                 # if we want to see the probability instead of full prediction
                 responses.append(classifier.predict(features.reshape(1,-1)))
                 if plot:
-                    if responses[i-1] == 1: # alternatively: if responses[i-1][0][1] >= 0.9:
+                    if responses[i-1] == 1: # alternatively: if responses[i-1][0][1] >= 0.55:
                         plt.title("Pyramid")
                     else:
                         plt.title("Null")
             else:
                 responses.append(classifier.predict_proba(features.reshape(1, -1)))
                 if plot:
-                    plt.title(responses[i - 1])
+                    plt.title(str(responses[i - 1]))
 
             y = int(cr_img_size[1]/2)+y
             if y >= img_size[1]:
@@ -114,10 +115,24 @@ def predict_single_image(classifier, imgPath, RGB=False, plot=False, plot_rect=F
                 if x < img_size[0]:
                     y = 0
                 # leave current y value for while stop condition otherwise
-        percentage = percentage + 0.4
+        percentage = percentage + counter
+        if percentage >= 0.6:
+            counter = 0.4
     if plot:
         plt.show()
-    return responses
+
+    # Check every response
+    res = 0
+    for r in responses:
+        # modify some condition depending on selected type of response
+        if proba:
+            cond = r[0][1] >= 0.55
+        else:
+            cond = r == 1
+        if cond:
+            res = 1
+    # if any is equal 1 - there is a pyramid on the image
+    return responses, res
 
 
 def predict_multiple_images(classifier, RGB=False, plot=False, proba=False):
@@ -139,45 +154,26 @@ def predict_multiple_images(classifier, RGB=False, plot=False, proba=False):
             else:
                 plt.title("Pyramid")
         else:
-            plt.title(predictions[i-1])
+            plt.title(str(predictions[i-1]))
         i = i+1
     plt.show()
     return predictions
 
 
+
 def advanced_predict_multiple_images(classifier, RGB=False, plot=False, proba=False, plot_rect=False):
     predictions = []
+    i = 1
     for imagePath in paths.list_images('Images/Test'):
-        res = 0
-        responses = predict_single_image(classifier, imagePath, RGB=RGB, plot=plot, plot_rect=plot_rect, proba=proba)
-
-        # Check every response
-        for r in responses:
-            # modify some condition depending on selected type of response
-            if proba:
-                cond = r[0][1] >= 0.6
-            else:
-                cond = r == 1
-
-            if cond:
-                res = 1
-        # if any is equal 1 - there is a pyramid on the image
-        if res == 1:
-            predictions.append(1)
-        else:
-            predictions.append(0)
-
+        _, resp = predict_single_image(classifier, imagePath, RGB=RGB, plot=plot, plot_rect=plot_rect, proba=proba)
+        predictions.append(resp)
         # plot images
-        i = 1
         plt.subplot(6,5,i)
         plt.imshow(read_image(imagePath))
-        if not proba:
-            if predictions[i-1] == 0:
-                plt.title("Null")
-            else:
-                plt.title("Pyramid")
+        if predictions[i-1] == 0:
+            plt.title("Null")
         else:
-            plt.title(predictions[i-1])
+            plt.title("Pyramid")
         i = i+1
     plt.show()
     return predictions
@@ -197,7 +193,9 @@ def Main():
     print(predict_multiple_images(classifier, proba=False))
 
     # For comparison
-    advanced_predict_multiple_images(classifier, proba=True)
+    _, response = predict_single_image(classifier, 'Images/Test/jaguarundi75.jpg', rows=15, columns=15, plot=True, proba=True)
+    print(response)
+    # advanced_predict_multiple_images(classifier, proba=True) # takes very long time
     print("DONE")
 
 
