@@ -7,6 +7,9 @@ class LocalBinaryPatterns:
     def __init__(self, nPoints, radius_of_scanning):
         self.nPoints = nPoints
         self.radius_of_scanning = radius_of_scanning
+
+    # def local_binary_pattern(self, IMG, nPoints, radius_of_scanning):
+
     
     def describe(self, image, RGB=False, eps=1e-7):
         if RGB==True:
