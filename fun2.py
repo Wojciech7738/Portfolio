@@ -61,8 +61,10 @@ def extract_multiple_images(path, RGB=False, plot=False, use_prev_data=False):
 
 
 # Method which divides single image into windows
-def predict_single_image(classifier, imgPath, rows=11, columns=14, RGB=False, plot=False, plot_rect=False, proba=False):
-    # RGB - prediction for RGB-LBP method;  plot_rect - plot a rectangle on the current window's position;
+def predict_single_image(classifier, imgPath, threshold, rows=11, columns=14, RGB=False, plot=False, plot_rect=False, proba=False):
+    # RGB - prediction for RGB-LBP method;      plot_rect - plot a rectangle on the current window's position to see
+    # if evetything works fine;     rows and columns - (...) on plot;   plot - show a plot;
+    # threshold - value of probability needed for each sample for being classified as "1"
     # proba - print probability instead of full prediction in plot's title
 
     image = read_image(imgPath)
@@ -70,7 +72,7 @@ def predict_single_image(classifier, imgPath, rows=11, columns=14, RGB=False, pl
     # image = blurring(image)
 
     responses = []
-    # Divide image into windows (unnecessary?)
+    # Divide image into windows
     # image_size is (300, 200), but the real one is REVERSED [cv2.resize function]
     img_size = image_size[::-1]
     percentage = 0.2 # percentage of cropped image relative to its original size
@@ -83,6 +85,7 @@ def predict_single_image(classifier, imgPath, rows=11, columns=14, RGB=False, pl
         while x < img_size[0] and y < img_size[1]:
             i = i+1
             cropped_image = image[x:cr_img_size[0]+x, y:cr_img_size[1]+y]
+            cropped_image = cv2.resize(cropped_image, image_size)
 
             # Plot a rectangle
             if plot:
@@ -106,6 +109,8 @@ def predict_single_image(classifier, imgPath, rows=11, columns=14, RGB=False, pl
                         plt.title("Null")
             else:
                 responses.append(classifier.predict_proba(features.reshape(1, -1)))
+                # round to two decimal places
+                responses[i - 1] = np.around(responses[i-1], 2)
                 if plot:
                     plt.title(str(responses[i - 1]))
 
@@ -126,7 +131,7 @@ def predict_single_image(classifier, imgPath, rows=11, columns=14, RGB=False, pl
     for r in responses:
         # modify some condition depending on selected type of response
         if proba:
-            cond = r[0][1] >= 0.55
+            cond = r[0][1] >= threshold
         else:
             cond = r == 1
         if cond:
@@ -161,11 +166,11 @@ def predict_multiple_images(classifier, RGB=False, plot=False, proba=False):
 
 
 
-def advanced_predict_multiple_images(classifier, RGB=False, plot=False, proba=False, plot_rect=False):
+def advanced_predict_multiple_images(classifier, threshold, RGB=False, plot=False, plot_rect=False):
     predictions = []
     i = 1
     for imagePath in paths.list_images('Images/Test'):
-        _, resp = predict_single_image(classifier, imagePath, RGB=RGB, plot=plot, plot_rect=plot_rect, proba=proba)
+        _, resp = predict_single_image(classifier, imagePath, threshold, RGB=RGB, plot=plot, plot_rect=plot_rect, proba=True)
         predictions.append(resp)
         # plot images
         plt.subplot(6,5,i)
@@ -190,17 +195,16 @@ def Main():
     classifier.fit(features, classes)
 
     # Test trained model
+    # (without dividing images)
     print(predict_multiple_images(classifier, proba=False))
 
     # For comparison
-    _, response = predict_single_image(classifier, 'Images/Test/jaguarundi75.jpg', rows=15, columns=15, plot=True, proba=True)
+    _, response = predict_single_image(classifier, 'Images/Test/walshs-pyramid---south-of-cairn-36649_1280x731.jpg', 0.52, rows=10, columns=15, plot=True, proba=True)
     print(response)
-    # advanced_predict_multiple_images(classifier, proba=True) # takes very long time
+    # advanced_predict_multiple_images(classifier, 0.52) # takes very long time
     print("DONE")
 
 
 
 if __name__ == '__main__':
     Main()
-
-
