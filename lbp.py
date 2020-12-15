@@ -127,13 +127,13 @@ class LocalBinaryPatterns:
 
 
 
-    def extract_single_image(self, img, RGB=False, plot=False):
-        LBP, hist = self.compute_LBP(img, RGB=RGB, plot=plot)
+    def extract_single_image(self, img, RGB=False):
+        LBP, hist = self.compute_LBP(img, RGB=RGB)
         # Return the LBP image and the histogram
         return LBP, hist
 
 
-    def extract_multiple_images(self, path, RGB=False, plot=False, use_prev_data=False):
+    def extract_multiple_images(self, path, RGB=False, use_prev_data=False):
         # Classes of images (0 if not given object, 1 otherwise)
         classes = []
         # Features - merged histograms
@@ -141,7 +141,7 @@ class LocalBinaryPatterns:
 
         # Compute histogram for every file in directory
         for imagePath in paths.list_images(path):
-            _, hist = self.extract_single_image(self.__read_image__(imagePath), RGB=RGB, plot=plot)
+            _, hist = self.extract_single_image(self.__read_image__(imagePath), RGB=RGB)
 
             # Create a list of classes (0 if there is "notpir" in filename)
             if not use_prev_data:
@@ -244,8 +244,8 @@ class LocalBinaryPatterns:
         return responses, res
 
 
-    def predict_multiple_images(self, classifier, RGB=False, plot=False, proba=False):
-        features2, _ = self.extract_multiple_images('Images/Test', RGB=RGB, plot=plot, use_prev_data=True)
+    def predict_multiple_images(self, classifier, path='Images/Test', RGB=False, proba=False):
+        features2, _ = self.extract_multiple_images(path, RGB=RGB, use_prev_data=True)
         if not proba:
             predictions = classifier.predict(features2)
         else:
@@ -270,10 +270,10 @@ class LocalBinaryPatterns:
 
 
 
-    def advanced_predict_multiple_images(self, classifier, threshold, RGB=False, plot=False, plot_rect=False):
+    def advanced_predict_multiple_images(self, classifier, threshold, directory='Images/Test', RGB=False, plot=False, plot_rect=False):
         predictions = []
         i = 1
-        for imagePath in paths.list_images('Images/Test'):
+        for imagePath in paths.list_images(directory):
             _, resp = self.predict_single_image(classifier, imagePath, threshold, RGB=RGB, plot=plot, plot_rect=plot_rect, proba=True)
             predictions.append(resp)
             # plot images
