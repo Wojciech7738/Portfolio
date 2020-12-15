@@ -75,7 +75,7 @@ class LocalBinaryPatterns:
             if RGB == True:
                 IMG = IMG[:, :, j]
             lbp = self.local_binary_pattern(IMG)
-            hist, _ = np.histogram(lbp.ravel(), bins=np.arange(lbp.min(), lbp.max(), 1))
+            hist, _ = np.histogram(lbp.ravel(), bins=np.arange(0, 256, 1))
 
             # normalize the histogram
             hist = hist.astype("float")
