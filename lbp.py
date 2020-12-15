@@ -49,6 +49,8 @@ def __cond_check__(img, p1, p2, current, binary_values):
     else:
         binary_values.append(1)
 
+
+
 class LocalBinaryPatterns:
     def __init__(self, nPoints, radius_of_scanning):
         self.nPoints = nPoints
