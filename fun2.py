@@ -20,9 +20,9 @@ def Main():
     print(LBP.predict_multiple_images(classifier, proba=False))
 
     # For comparison
-    _, response = LBP.predict_single_image(classifier, 'Images/Test/walshs-pyramid---south-of-cairn-36649_1280x731.jpg', 0.52, rows=10, columns=15, plot=True, proba=True)
+    _, response = LBP.predict_single_image(classifier, 'Images/Test/walshs-pyramid---south-of-cairn-36649_1280x731.jpg', 0.52)#, rows=10, columns=15, plot=False, proba=True)
     print(response)
-    # advanced_predict_multiple_images(classifier, 0.52) # takes very long time
+    print(LBP.advanced_predict_multiple_images(classifier, 0.52)) # takes very long time
     end = time.time()
     print(end-begin)
     print("DONE")
