@@ -9,7 +9,6 @@ def Main():
     # extract an matrix of histograms and vector of classes
     begin = time.time()
     features, classes = LBP.extract_multiple_images('Images/Train')
-    # _, f = LBP.extract_single_image(LBP.__read_image__('Images/Train/notpir63.jpeg'))
 
     # Construct the strong classifier from image features (week classifier)
     classifier = se.AdaBoostClassifier(n_estimators=features.shape[1], random_state=0)

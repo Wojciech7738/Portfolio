@@ -5,6 +5,7 @@ from imutils import paths
 
 def __lbp_computing__(image, square_side):
     lbp_image = np.zeros(image.shape, dtype=np.int)
+    Hist = None
     # 1: divide image into grid
     for r in range(3):
         for c in range(4):  # columns
@@ -36,12 +37,20 @@ def __lbp_computing__(image, square_side):
                     # convert into decimal
                     value = int(bin(int(''.join(map(str, binary_values)), 2)), 2)
                     lbp_image[square_side * r + i, square_side * c + j] = value
-    return lbp_image
+
+            # create histogram of single window
+            hist, _ = np.histogram(lbp_image[square_side * r:square_side * (r + 1),
+                      square_side * c:square_side * (c + 1)].ravel(), bins=np.arange(0, 256, 1))
+            # Concatenate histograms
+            if type(Hist) != np.ndarray:
+                Hist = hist
+            else:
+                Hist = np.concatenate((Hist,hist))
+    return Hist, lbp_image
 
 def neighbour_positions(row, col):
-    return [(row - 1, col - 1), (row - 1, col), (row - 1, col + 1),
-                                                     (row, col + 1), (row + 1, col + 1),
-                                                     (row + 1, col), (row + 1, col - 1), (row, col - 1)]
+    return [(row, col + 1), (row + 1, col + 1), (row + 1, col), (row + 1, col - 1), (row, col - 1),
+            (row - 1, col - 1), (row - 1, col), (row - 1, col + 1)]
 
 def __cond_check__(img, p1, p2, current, binary_values):
     if img[p1][p2] < current:
@@ -68,54 +77,46 @@ class LocalBinaryPatterns:
         return __lbp_computing__(image, self.square_side)
 
 
-    def describe(self, IMG, RGB=False, eps=1e-7):
+    def describe(self, IMG, RGB=False):
         if RGB == True:
             i = 3
         else:
             i = 1
         for j in range(i):
             if RGB == True:
-                IMG = IMG[:, :, j]
-            lbp = self.local_binary_pattern(IMG)
-            hist, _ = np.histogram(lbp.ravel(), bins=np.arange(0, 256, 1))
-
-            # normalize the histogram
+                image = IMG[:, :, j]
+            else:
+                image = IMG
+            hist, lbp = self.local_binary_pattern(image)
+            # normalize the histogram (values from 0 to 1)
             hist = hist.astype("float")
-            hist /= (hist.sum() + eps)
+            hist = (hist-hist.min())/(hist.max()-hist.min())
+
             if j == 0:
                 Hist = hist
             else:
+                # Concatenate if given method is RGB-LBP
                 Hist = np.concatenate((Hist, hist))
         # return the histogram of Local Binary Patterns
-        return Hist
+        # obviously, for RGB-LBP it returns only LBP image for the last channel
+        return Hist, lbp
 
-    def compute_LBP(self, img, RGB=False, plot=False, transform_image=False):
+
+    def compute_LBP(self, img, RGB=False, plot=False):
         LBP = None
         if RGB == False:
             method_name = "LBP"
             gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            if transform_image:
-                # "LBP" variable is not necessary for object detection. It only shows how LBP works
-                LBP = self.local_binary_pattern(gray_img)
             # only histogram is needed for object detection
-            hist = self.describe(gray_img)
+            hist, LBP = self.describe(gray_img)
 
         else:
             method_name = "RGB-LBP"
-            if transform_image:
-                R = self.local_binary_pattern(img[:, :, 0])
-                G = self.local_binary_pattern(img[:, :, 1])
-                B = self.local_binary_pattern(img[:, :, 2])
-                LBP = np.vstack((R, G))
-                LBP = np.vstack((LBP, B))
-            # same
-            hist = self.describe(img, RGB=True)
-
+            hist, LBP = self.describe(img, RGB=True)
         # Show an image
         if plot:
             plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
             plt.show()
-
         return LBP, hist
 
     def blurring(self, img):
@@ -125,7 +126,7 @@ class LocalBinaryPatterns:
         return img
 
 
-    # IMAGE HERE
+
     def extract_single_image(self, img, RGB=False, plot=False):
         LBP, hist = self.compute_LBP(img, RGB=RGB, plot=plot)
         # Return the LBP image and the histogram
