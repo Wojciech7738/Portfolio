@@ -3,21 +3,58 @@ import cv2
 import matplotlib.pyplot as plt
 from imutils import paths
 
+def __lbp_computing__(image, square_side):
+    lbp_image = np.zeros(image.shape, dtype=np.int)
+    # 1: divide image into grid
+    for r in range(3):
+        for c in range(4):  # columns
+            new_img = image[square_side * r:square_side * (r + 1),
+                      square_side * c:square_side * (c + 1)]
+            for i in range(square_side):
+                for j in range(square_side):
+                    binary_values = []
+                    current = new_img[i, j]
+                    nei_position = neighbour_positions(i, j)
+                    for k in range(len(nei_position)):
+                        # 2: compute LBP
+                        if square_side * r + nei_position[k][0] < 0 or \
+                                square_side * c + nei_position[k][1] < 0:
+                            binary_values.append(0)
+                        else:
+                            if nei_position[k][0] >= square_side or nei_position[k][1] >= square_side:
+                                if square_side * r + nei_position[k][0] >= image.shape[0] or \
+                                        square_side * c + nei_position[k][1] >= image.shape[1]:
+                                    # if given point is beyond the image - write 0
+                                    binary_values.append(0)
+                                else:
+                                    __cond_check__(image, square_side * r + nei_position[k][0],
+                                                        square_side * c + nei_position[k][1], current,
+                                                        binary_values)
+                            else:
+                                __cond_check__(new_img, nei_position[k][0], nei_position[k][1], current,
+                                                    binary_values)
+                    # convert into decimal
+                    value = int(bin(int(''.join(map(str, binary_values)), 2)), 2)
+                    lbp_image[square_side * r + i, square_side * c + j] = value
+    return lbp_image
+
+def neighbour_positions(row, col):
+    return [(row - 1, col - 1), (row - 1, col), (row - 1, col + 1),
+                                                     (row, col + 1), (row + 1, col + 1),
+                                                     (row + 1, col), (row + 1, col - 1), (row, col - 1)]
+
+def __cond_check__(img, p1, p2, current, binary_values):
+    if img[p1][p2] < current:
+        binary_values.append(0)
+    else:
+        binary_values.append(1)
 
 class LocalBinaryPatterns:
     def __init__(self, nPoints, radius_of_scanning):
         self.nPoints = nPoints
         self.radius_of_scanning = radius_of_scanning
-        # gray image with size 312x416
-        # self.IMG = np.ascontiguousarray(self.__read_image__(imgPath), dtype=np.int)
-        # new image
-        # self.lbp_image = np.zeros(self.IMG.shape, dtype=np.int)
         # window's side
         self.square_side = 104
-        # positions of the neighbours (see how LBP works)
-        self.neighbour_positions = lambda row, col: [(row - 1, col - 1), (row - 1, col), (row - 1, col + 1),
-                                                     (row, col + 1), (row + 1, col + 1),
-                                                     (row + 1, col), (row + 1, col - 1), (row, col - 1)]
         self.image_size = (416, 312)
 
     def __read_image__(self, imgPath):
@@ -26,46 +63,8 @@ class LocalBinaryPatterns:
 
     def local_binary_pattern(self, image):
         image = np.ascontiguousarray(image, dtype=np.int)
-        self.lbp_image = np.zeros(image.shape, dtype=np.int)
-        # 1: divide image into grid
-        for r in range(3):
-            for c in range(4):  # columns
-                self.__lbp_computing__(image, r, c)
-        return self.lbp_image
+        return __lbp_computing__(image, self.square_side)
 
-    def __lbp_computing__(self, image, r, c):
-        new_img = image[self.square_side * r:self.square_side * (r + 1),
-                  self.square_side * c:self.square_side * (c + 1)]
-        for i in range(self.square_side):
-            for j in range(self.square_side):
-                binary_values = []
-                current = new_img[i, j]
-                nei_position = self.neighbour_positions(i, j)
-                for k in range(len(nei_position)):
-                    # 2: compute LBP
-                    if self.square_side * r + nei_position[k][0] < 0 or \
-                            self.square_side * c + nei_position[k][1] < 0:
-                        binary_values.append(0)
-                    else:
-                        if nei_position[k][0] >= self.square_side or nei_position[k][1] >= self.square_side:
-                            if self.square_side * r + nei_position[k][0] >= image.shape[0] or \
-                                    self.square_side * c + nei_position[k][1] >= image.shape[1]:
-                                # if given point is beyond the image - write 0
-                                binary_values.append(0)
-                            else:
-                                self.__cond_check__(image, self.square_side * r + nei_position[k][0],
-                                                    self.square_side * c + nei_position[k][1], current, binary_values)
-                        else:
-                            self.__cond_check__(new_img, nei_position[k][0], nei_position[k][1], current, binary_values)
-                # convert into decimal
-                value = int(bin(int(''.join(map(str, binary_values)), 2)), 2)
-                self.lbp_image[self.square_side * r + i, self.square_side * c + j] = value
-
-    def __cond_check__(self, img, p1, p2, current, binary_values):
-        if img[p1][p2] < current:
-            binary_values.append(0)
-        else:
-            binary_values.append(1)
 
     def describe(self, IMG, RGB=False, eps=1e-7):
         if RGB == True:

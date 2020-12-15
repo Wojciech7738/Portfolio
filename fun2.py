@@ -12,19 +12,19 @@ def Main():
     end = time.time()
     print(end-begin)
 
-    # # Construct the strong classifier from image features (week classifier)
-    # classifier = se.AdaBoostClassifier(n_estimators=features.shape[1], random_state=0)
-    # classifier.fit(features, classes)
-    #
-    # # Test trained model
-    # # (without dividing images)
-    # print(LBP.predict_multiple_images(classifier, proba=False))
-    #
-    # # For comparison
-    # _, response = LBP.predict_single_image(classifier, 'Images/Test/walshs-pyramid---south-of-cairn-36649_1280x731.jpg', 0.52, rows=10, columns=15, plot=True, proba=True)
-    # print(response)
-    # # advanced_predict_multiple_images(classifier, 0.52) # takes very long time
-    # print("DONE")
+    # Construct the strong classifier from image features (week classifier)
+    classifier = se.AdaBoostClassifier(n_estimators=features.shape[1], random_state=0)
+    classifier.fit(features, classes)
+
+    # Test trained model
+    # (without dividing images)
+    print(LBP.predict_multiple_images(classifier, proba=False))
+
+    # For comparison
+    _, response = LBP.predict_single_image(classifier, 'Images/Test/walshs-pyramid---south-of-cairn-36649_1280x731.jpg', 0.52, rows=10, columns=15, plot=True, proba=True)
+    print(response)
+    # advanced_predict_multiple_images(classifier, 0.52) # takes very long time
+    print("DONE")
 
 
 
