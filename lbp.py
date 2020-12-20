@@ -3,7 +3,7 @@ import cv2
 import matplotlib.pyplot as plt
 from imutils import paths
 
-def __lbp_computing__(image, square_side):
+def __local_binary_pattern__(image, square_side):
     lbp_image = np.zeros(image.shape, dtype=np.int)
     Hist = None
     # 1: divide image into grid
@@ -72,11 +72,6 @@ class LocalBinaryPatterns:
         img = cv2.imread(imgPath)
         return cv2.resize(img, (416, 312))
 
-    def local_binary_pattern(self, image):
-        image = np.ascontiguousarray(image, dtype=np.int)
-        return __lbp_computing__(image, self.square_side)
-
-
     def describe(self, IMG, RGB=False):
         if RGB == True:
             i = 3
@@ -87,7 +82,8 @@ class LocalBinaryPatterns:
                 image = IMG[:, :, j]
             else:
                 image = IMG
-            hist, lbp = self.local_binary_pattern(image)
+            image = np.ascontiguousarray(image, dtype=np.int)
+            hist, lbp = __local_binary_pattern__(image, self.square_side)
             # normalize the histogram (values from 0 to 1)
             hist = hist.astype("float")
             hist = (hist-hist.min())/(hist.max()-hist.min())
