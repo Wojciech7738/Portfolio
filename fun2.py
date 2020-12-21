@@ -5,23 +5,28 @@ import pickle
 # import pandas as pd, csv
 
 
+def isRGB(value):
+    if value:
+        return 'classifier_RGB.pkl'
+    else:
+        return 'classifier.pkl'
+
 def create_model(object, RGB=False):
     # extract an matrix of histograms and vector of classes
     features, classes = object.extract_multiple_images('Images/Train', RGB=RGB)
     # Construct the strong classifier from image features (week classifiers)
     model = se.AdaBoostClassifier(n_estimators=features.shape[1], random_state=0)
     model.fit(features, classes)
-
-    if RGB:
-        filename = 'classifier_RGB.pkl'
-    else:
-        filename = 'classifier.pkl'
+    # save model into file
+    filename = isRGB(RGB)
     file = open(filename, 'wb')
     pickle.dump(model, file)
     file.close()
 
 
-def tests():
+def tests(RGB=False):
+    filename = isRGB(RGB)
+
     # Load model
     file = open(filename, 'rb')
     classifier = pickle.load(file)
@@ -38,12 +43,11 @@ def tests():
 
 
 if __name__ == '__main__':
-    global filename
     lbp_size = (8, 2)
     LBP = LocalBinaryPatterns(*lbp_size)
 
-    create_model(LBP)
-    # tests()
+    # create_model(LBP)
+    tests()
 
     print("DONE")
 
