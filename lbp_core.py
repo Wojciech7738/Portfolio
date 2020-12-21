@@ -1,0 +1,55 @@
+import numpy as np
+
+class LBP_core:
+    def __local_binary_pattern__(self, image, square_side):
+        lbp_image = np.zeros(image.shape, dtype=np.int)
+        Hist = None
+        # 1: divide image into grid
+        for r in range(3):
+            for c in range(4):  # columns
+                for i in range(square_side):
+                    for j in range(square_side):
+                        binary_values = []
+                        current = image[square_side*r+i, square_side*c+j]
+                        nei_position = self.neighbour_positions(i, j)
+                        for k in range(len(nei_position)):
+                            # 2: compute LBP
+                            if square_side * r + nei_position[k][0] < 0 or \
+                                    square_side * c + nei_position[k][1] < 0:
+                                binary_values.append(0)
+                            else:
+                                if nei_position[k][0] >= square_side or nei_position[k][1] >= square_side:
+                                    if square_side * r + nei_position[k][0] >= image.shape[0] or \
+                                            square_side * c + nei_position[k][1] >= image.shape[1]:
+                                        # if given point is beyond the image - write 0
+                                        binary_values.append(0)
+                                    else:
+                                        self.__cond_check__(image, square_side * r + nei_position[k][0],
+                                                            square_side * c + nei_position[k][1], current,
+                                                            binary_values)
+                                else:
+                                    self.__cond_check__(image, square_side * r + nei_position[k][0],
+                                    square_side * c + nei_position[k][1], current, binary_values)
+                        # convert into decimal
+                        value = int(bin(int(''.join(map(str, binary_values)), 2)), 2)
+                        lbp_image[square_side * r + i, square_side * c + j] = value
+
+                # create histogram of single window
+                hist, _ = np.histogram(lbp_image[square_side * r:square_side * (r + 1),
+                          square_side * c:square_side * (c + 1)].ravel(), bins=np.arange(0, 256, 1))
+                # Concatenate histograms
+                if type(Hist) != np.ndarray:
+                    Hist = hist
+                else:
+                    Hist = np.concatenate((Hist,hist))
+        return Hist, lbp_image
+
+    def neighbour_positions(self, row, col):
+        return [(row, col + 1), (row + 1, col + 1), (row + 1, col), (row + 1, col - 1), (row, col - 1),
+                (row - 1, col - 1), (row - 1, col), (row - 1, col + 1)]
+
+    def __cond_check__(self, img, p1, p2, current, binary_values):
+        if img[p1][p2] < current:
+            binary_values.append(0)
+        else:
+            binary_values.append(1)
