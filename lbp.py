@@ -3,6 +3,7 @@ import cv2
 import matplotlib.pyplot as plt
 from imutils import paths
 from lbp_core import LBP_core
+from skimage import feature
 # from c_python.lbp_cy import LBP_core
 
 class LocalBinaryPatterns(LBP_core):
@@ -10,14 +11,14 @@ class LocalBinaryPatterns(LBP_core):
         self.nPoints = nPoints
         self.radius_of_scanning = radius_of_scanning
         # window's side
-        self.square_side = 104
+        self.__square_side__ = 104
         self.image_size = (416, 312)
 
     def __read_image__(self, imgPath):
         img = cv2.imread(imgPath)
         return cv2.resize(img, (416, 312))
 
-    def describe(self, IMG, RGB=False):
+    def describe(self, IMG, RGB=False, use_sklearn=False):
         if RGB == True:
             i = 3
         else:
@@ -28,7 +29,11 @@ class LocalBinaryPatterns(LBP_core):
             else:
                 image = IMG
             image = np.ascontiguousarray(image, dtype=np.int)
-            hist, lbp = self.__local_binary_pattern__(image, self.square_side)
+            if not use_sklearn:
+                hist, lbp = self.__local_binary_pattern__(image, self.__square_side__)
+            else:
+                lbp = feature.local_binary_pattern(image, self.nPoints, self.radius_of_scanning)
+                hist, _ = np.histogram(lbp, bins=np.arange(0, 256, 1))
             # normalize the histogram (values from 0 to 1)
             hist = hist.astype("float")
             hist = (hist-hist.min())/(hist.max()-hist.min())
