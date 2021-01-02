@@ -5,8 +5,8 @@ import pickle
 # import pandas as pd, csv
 
 
-def isRGB(value):
-    if value:
+def isRGB(RGB):
+    if RGB:
         return 'classifier_RGB.pkl'
     else:
         return 'classifier.pkl'
