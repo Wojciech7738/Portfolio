@@ -15,7 +15,7 @@ def create_model(object, RGB=False):
     # extract an matrix of histograms and vector of classes
     features, classes = object.extract_multiple_images('Images/Train', RGB=RGB)
     # Construct the strong classifier from image features (week classifiers)
-    model = se.AdaBoostClassifier(n_estimators=features.shape[1], random_state=0)
+    model = se.AdaBoostClassifier(n_estimators=128, random_state=0)
     model.fit(features, classes)
     # save model into file
     filename = isRGB(RGB)
