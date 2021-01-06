@@ -2,8 +2,8 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 from imutils import paths
-from lbp_core import LBP_core
 from skimage import feature
+from lbp_core import LBP_core
 # from c_python.lbp_cy import LBP_core
 
 class LocalBinaryPatterns(LBP_core):
