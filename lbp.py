@@ -43,8 +43,8 @@ class LocalBinaryPatterns(LBP_core):
             else:
                 # Concatenate if given method is RGB-LBP
                 Hist = np.concatenate((Hist, hist))
-        # return the histogram of Local Binary Patterns
-        # obviously, for RGB-LBP it returns only LBP image for the last channel
+        # Return the histogram of Local Binary Patterns
+        # For RGB-LBP it returns only LBP image for the last channel
         return Hist, lbp
 
 
