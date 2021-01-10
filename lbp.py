@@ -113,7 +113,7 @@ class LocalBinaryPatterns(LBP_core):
     # Method which divides single image into windows
     def predict_single_image(self, classifier, imgPath, threshold, rows=11, columns=14, RGB=False, plot=False, plot_rect=False, proba=False):
         # RGB - prediction for RGB-LBP method;      plot_rect - plot a rectangle on the current window's position to see
-        # if evetything works fine;     rows and columns - (...) on plot;   plot - show a plot;
+        # if everything works fine;     rows and columns - (...) on plot;   plot - show a plot;
         # threshold - value of probability needed for each sample for being classified as "1"
         # proba - print probability instead of full prediction in plot's title
 
