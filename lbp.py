@@ -155,6 +155,8 @@ class LocalBinaryPatterns(LBP_core):
                     responses.append(classifier.predict(features.reshape(1,-1)))
                     if plot:
                         if responses[i-1] == 1: # alternatively: if responses[i-1][0][1] >= 0.55:
+                            cropped_image = cv2.rectangle(image, (y, x), (cr_img_size[1] + y, cr_img_size[0] + x),
+                            (255, 192, 203), 2)
                             plt.title("Pyramid")
                         else:
                             plt.title("Null")
