@@ -40,7 +40,7 @@ def tests(RGB=False):
     # _, response = LBP.predict_single_image(classifier, 'Images/Test/walshs-pyramid---south-of-cairn-36649_1280x731.jpg', 0.52)#, rows=10, columns=15, plot=False, proba=True)
     # print(response)
     begin = time.time()
-    print(LBP.advanced_predict_multiple_images(classifier, 0.52))  # takes very long time
+    print(LBP.advanced_predict_multiple_images(classifier, 0.52, RGB=RGB))  # takes very long time
     end = time.time()
     print(end-begin)
 
@@ -49,8 +49,8 @@ if __name__ == '__main__':
     lbp_size = (8, 2)
     LBP = LocalBinaryPatterns(*lbp_size)
 
-    # create_model(LBP)
-    tests()
+    create_model(LBP, RGB=True)
+    # tests()
 
     print("DONE")
 

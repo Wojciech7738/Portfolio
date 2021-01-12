@@ -137,17 +137,18 @@ class LocalBinaryPatterns(LBP_core):
                 cropped_image = image[x:cr_img_size[0]+x, y:cr_img_size[1]+y]
                 cropped_image = cv2.resize(cropped_image, self.image_size)
 
+                _, features = self.extract_single_image(cropped_image, RGB=RGB)
+
                 # Plot a rectangle
                 if plot:
                     if not plot_rect:
-                        plt.subplot(rows,columns,i)
+                        plt.subplot(rows, columns, i)
                         plt.imshow(cropped_image)
                     else:
-                        img_with_rectangle = cv2.rectangle(image, (y,x), (cr_img_size[1]+y,cr_img_size[0]+x), (255,int((percentage+0.4)*255),int((percentage+0.4)*255)),2)
+                        img_with_rectangle = cv2.rectangle(image, (y, x), (cr_img_size[1] + y, cr_img_size[0] + x),
+                            (255, int((percentage + 0.4) * 255), int((percentage + 0.4) * 255)), 2)
                         plt.imshow(img_with_rectangle)
                         plt.show()
-
-                _, features = self.extract_single_image(cropped_image, RGB=RGB)
 
                 if not proba:
                     # if we want to see the probability instead of full prediction
