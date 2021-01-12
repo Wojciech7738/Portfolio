@@ -150,6 +150,7 @@ class LocalBinaryPatterns(LBP_core):
                         plt.imshow(img_with_rectangle)
                         plt.show()
 
+
                 if not proba:
                     # if we want to see the probability instead of full prediction
                     responses.append(classifier.predict(features.reshape(1,-1)))
