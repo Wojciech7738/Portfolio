@@ -47,8 +47,15 @@ class LocalBinaryPatterns(LBP_core):
         # For RGB-LBP it returns only LBP image for the last channel
         return Hist, lbp
 
+    def blurring(self, img):
+        # img = cv2.GaussianBlur(img, (5, 5), 0)
+        # img = cv2.bilateralFilter(img, 9, 75, 75)
+        img = cv2.blur(img, (3, 3))
+        return img
 
-    def compute_LBP(self, img, RGB=False, plot=False):
+
+
+    def extract_single_image(self, img, RGB=False, plot=False, use_sklearn=False):
         LBP = None
         if RGB == False:
             method_name = "LBP"
@@ -58,28 +65,14 @@ class LocalBinaryPatterns(LBP_core):
 
         else:
             method_name = "RGB-LBP"
-            hist, LBP = self.describe(img, RGB=True)
+            hist, LBP = self.describe(img, RGB=True, use_sklearn=use_sklearn)
         # Show an image
         if plot:
             plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
             plt.show()
         return LBP, hist
 
-    def blurring(self, img):
-        # img = cv2.GaussianBlur(img, (5, 5), 0)
-        # img = cv2.bilateralFilter(img, 9, 75, 75)
-        img = cv2.blur(img, (3, 3))
-        return img
-
-
-
-    def extract_single_image(self, img, RGB=False):
-        LBP, hist = self.compute_LBP(img, RGB=RGB)
-        # Return the LBP image and the histogram
-        return LBP, hist
-
-
-    def extract_multiple_images(self, path, RGB=False, use_prev_data=False):
+    def extract_multiple_images(self, path, RGB=False, use_prev_data=False, use_sklearn=False):
         # Classes of images (0 if not given object, 1 otherwise)
         classes = []
         # Features - merged histograms
@@ -87,7 +80,7 @@ class LocalBinaryPatterns(LBP_core):
 
         # Compute histogram for every file in directory
         for imagePath in paths.list_images(path):
-            _, hist = self.extract_single_image(self.__read_image__(imagePath), RGB=RGB)
+            _, hist = self.extract_single_image(self.__read_image__(imagePath), RGB=RGB, use_sklearn=use_sklearn)
 
             # Create a list of classes (0 if there is "notpir" in filename)
             if not use_prev_data:
@@ -111,10 +104,11 @@ class LocalBinaryPatterns(LBP_core):
 
 
     # Method which divides single image into windows
-    def predict_single_image(self, classifier, imgPath, threshold, rows=11, columns=14, RGB=False, plot=False, plot_rect=False, proba=False):
-        # RGB - prediction for RGB-LBP method;      plot_rect - plot a rectangle on the current window's position to see
-        # if everything works fine;     rows and columns - (...) on plot;   plot - show a plot;
-        # threshold - value of probability needed for each sample for being classified as "1"
+    def predict_single_image(self, classifier, imgPath, threshold, RGB=False, use_sklearn=False, proba=False, debug=False):
+        # RGB - prediction for RGB-LBP method;
+        # debug - plot a single window to see if everything works fine;
+        # threshold - value of probability needed for each sample for being classified as "1";
+        # use_sklearn - use an sklearn implementation of LBP instead of the slowest one in the world;
         # proba - print probability instead of full prediction in plot's title
 
         image = self.__read_image__(imgPath)
@@ -128,6 +122,7 @@ class LocalBinaryPatterns(LBP_core):
         percentage = 0.2 # percentage of cropped image relative to its original size
         counter = 0.2 # is added in every loop iteration
         i=0
+        res = 0
         while percentage < 1.09:
             x = 0
             y = 0
@@ -137,35 +132,23 @@ class LocalBinaryPatterns(LBP_core):
                 cropped_image = image[x:cr_img_size[0]+x, y:cr_img_size[1]+y]
                 cropped_image = cv2.resize(cropped_image, self.image_size)
 
-                _, features = self.extract_single_image(cropped_image, RGB=RGB)
-
-                # Plot a rectangle
-                if plot:
-                    if not plot_rect:
-                        plt.subplot(rows, columns, i)
-                        plt.imshow(cropped_image)
-                    else:
-                        img_with_rectangle = cv2.rectangle(image, (y, x), (cr_img_size[1] + y, cr_img_size[0] + x),
-                            (255, int((percentage + 0.4) * 255), int((percentage + 0.4) * 255)), 2)
-                        plt.imshow(img_with_rectangle)
-                        plt.show()
+                _, features = self.extract_single_image(cropped_image, RGB=RGB, use_sklearn=use_sklearn)
 
                 if not proba:
                     # if we want to see the probability instead of full prediction
                     responses.append(classifier.predict(features.reshape(1,-1)))
-                    if plot:
-                        if responses[i-1] == 1: # alternatively: if responses[i-1][0][1] >= 0.55:
-                            cropped_image = cv2.rectangle(image, (y, x), (cr_img_size[1] + y, cr_img_size[0] + x),
-                            (255, 192, 203), 2)
-                            plt.title("Pyramid")
-                        else:
-                            plt.title("Null")
+                    if responses[i-1] == 1:
+                        image = cv2.rectangle(image, (y, x), (cr_img_size[1] + y, cr_img_size[0] + x),
+                        (255, 192, 203), 2)
+                        res = 1
                 else:
                     responses.append(classifier.predict_proba(features.reshape(1, -1)))
                     # round to two decimal places
                     responses[i - 1] = np.around(responses[i-1], 2)
-                    if plot:
-                        plt.title(str(responses[i - 1]))
+                    if responses[i - 1][0][1] >= threshold:
+                        image = cv2.rectangle(image, (y, x), (cr_img_size[1] + y, cr_img_size[0] + x),
+                                              (255, 192, 203), 2)
+                        res = 1
 
                 y = int(cr_img_size[1]/2)+y
                 if y >= img_size[1]:
@@ -173,24 +156,23 @@ class LocalBinaryPatterns(LBP_core):
                     if x < img_size[0]:
                         y = 0
                     # leave current y value for while stop condition otherwise
+
+                # It will be removed in the future
+                if debug:
+                    fig, ax = plt.subplots(1,1)
+                    ax.imshow(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
+                    plt.title(str(responses[i-1]))
+                    somestring = "DEBUG/p2"
+                    if proba:
+                        somestring="DEBUG/p2/AAAAAAAAA"
+                    fig.savefig(somestring+imgPath[12:16]+str(i)+".png")
+                    plt.close(fig)
             percentage = percentage + counter
             if percentage >= 0.6:
                 counter = 0.4
-        if plot:
-            plt.show()
 
-        # Check every response
-        res = 0
-        for r in responses:
-            # modify some condition depending on selected type of response
-            if proba:
-                cond = r[0][1] >= threshold
-            else:
-                cond = r == 1
-            if cond:
-                res = 1
         # if any is equal 1 - there is a pyramid on the image
-        return responses, res
+        return responses, res, image
 
 
     def predict_multiple_images(self, classifier, path='Images/Test', RGB=False, proba=False):
@@ -218,21 +200,32 @@ class LocalBinaryPatterns(LBP_core):
         return predictions
 
 
-
-    def advanced_predict_multiple_images(self, classifier, threshold, directory='Images/Test', RGB=False, plot=False, plot_rect=False):
+    def advanced_predict_multiple_images(self, classifier, threshold, fname, directory='Images/Test', RGB=False, use_sklearn=False, proba=False):
         predictions = []
+        images = []
         i = 1
+        # new:
+        fig, ax = plt.subplots(4, 4)
         for imagePath in paths.list_images(directory):
-            _, resp = self.predict_single_image(classifier, imagePath, threshold, RGB=RGB, plot=plot, plot_rect=plot_rect, proba=True)
+            _, resp, img = self.predict_single_image(classifier, imagePath, threshold, RGB=RGB, use_sklearn=use_sklearn, proba=proba)
             predictions.append(resp)
+            images.append(img)
+
             # plot images
-            plt.subplot(6,5,i)
-            plt.imshow(self.__read_image__(imagePath))
+            # old:
+            # plt.subplot(4,4,i)
+            # plt.imshow(cv2.cvtColor(images[i-1], cv2.COLOR_BGR2RGB))
+
+            # new:
+            ax[(i-1)%4, int((i-1)/4)].imshow(cv2.cvtColor(images[i-1], cv2.COLOR_BGR2RGB))
+
             if predictions[i-1] == 0:
                 plt.title("Null")
             else:
                 plt.title("Pyramid")
             i = i+1
-        plt.show()
+        fig.savefig("RESULTS/"+fname+".png")
+        plt.close(fig)
+        # plt.show()
         return predictions
 
