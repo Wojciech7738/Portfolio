@@ -126,7 +126,8 @@ class LocalBinaryPatterns(LBP_core):
         while percentage < 1.09:
             x = 0
             y = 0
-            cr_img_size = (int(img_size[0]*percentage), int(img_size[1]*percentage))
+            # TO REMOVE !!!
+            cr_img_size = (int(img_size[0]*int(percentage)), int(img_size[1]*int(percentage)))
             while x < img_size[0] and y < img_size[1]:
                 i = i+1
                 cropped_image = image[x:cr_img_size[0]+x, y:cr_img_size[1]+y]
@@ -209,9 +210,11 @@ class LocalBinaryPatterns(LBP_core):
     def advanced_predict_multiple_images(self, classifier, threshold, fname, directory='Images/Test', RGB=False, use_sklearn=False, proba=False):
         predictions = []
         images = []
-        i = 1
+        i = 0
         # new:
-        fig, ax = plt.subplots(12, 13, figsize=(19.20,10.80))
+        rows = 12
+        cols = 13
+        fig, ax = plt.subplots(rows, cols, figsize=(19.20,10.80))
         fig.tight_layout()
         for imagePath in paths.list_images(directory):
             _, resp, img = self.predict_single_image(classifier, imagePath, threshold, RGB=RGB, use_sklearn=use_sklearn, proba=proba)
@@ -224,13 +227,13 @@ class LocalBinaryPatterns(LBP_core):
             # plt.imshow(cv2.cvtColor(images[i-1], cv2.COLOR_BGR2RGB))
 
             # new:
-            ax[(i-1)%4, int((i-1)/4)].imshow(cv2.cvtColor(images[i-1], cv2.COLOR_BGR2RGB))
-            ax[(i - 1) % 4, int((i - 1) / 4)].axis('off')
+            ax[int(i/cols), i%cols].imshow(cv2.cvtColor(images[i], cv2.COLOR_BGR2RGB))
+            ax[int(i/cols), i%cols].axis('off')
 
-            if predictions[i-1] == 0:
-                ax[(i-1)%4, int((i-1)/4)].set_title('Null')
+            if predictions[i] == 0:
+                ax[int(i/cols), i%cols].set_title('Null')
             else:
-                ax[(i-1)%4, int((i-1)/4)].set_title('Pyramid')
+                ax[int(i/cols), i%cols].set_title('Pyramid')
             i = i+1
         fig.savefig("RESULTS/"+fname+".png")
         plt.close(fig)
