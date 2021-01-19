@@ -15,7 +15,7 @@ def create_model(object, RGB=False):
     # extract an matrix of histograms and vector of classes
     features, classes = object.extract_multiple_images('Images/Train', RGB=RGB)
     # Construct the strong classifier from image features (week classifiers)
-    model = se.AdaBoostClassifier(n_estimators=features.shape[1], random_state=0)
+    model = se.AdaBoostClassifier(n_estimators=100, random_state=0)
     model.fit(features, classes)
     # save model into file
     filename = isRGB(RGB)
@@ -34,7 +34,7 @@ def tests(fname, RGB=False, proba=False, debug=False):
 
     # Test trained model
     begin = time.time()
-    print(LBP.advanced_predict_multiple_images(classifier, 0.59, fname, RGB=RGB, proba=proba))  # takes very long time
+    print(LBP.advanced_predict_multiple_images(classifier, 0.59, fname, directory='Images/Train', RGB=RGB, proba=proba))  # takes very long time
     end = time.time()
     print(end-begin)
 

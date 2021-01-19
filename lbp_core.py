@@ -1,5 +1,4 @@
 import numpy as np
-import threading
 
 class LBP_core:
     def __local_binary_pattern__(self, image, square_side):
@@ -25,12 +24,15 @@ class LBP_core:
                                         # if given point is beyond the image - write 0
                                         binary_values.append(0)
                                     else:
-                                        self.__cond_check__(image, square_side * r + position[0],
-                                                            square_side * c + position[1], current,
-                                                            binary_values)
+                                        if image[square_side * r + position[0]][square_side * c + position[1]] < current:
+                                            binary_values.append(0)
+                                        else:
+                                            binary_values.append(1)
                                 else:
-                                    self.__cond_check__(image, square_side * r + position[0],
-                                    square_side * c + position[1], current, binary_values)
+                                    if image[square_side * r + position[0]][square_side * c + position[1]] < current:
+                                        binary_values.append(0)
+                                    else:
+                                        binary_values.append(1)
                         # convert into decimal
                         value = int(bin(int(''.join(map(str, binary_values)), 2)), 2)
                         lbp_image[square_side * r + i, square_side * c + j] = value
@@ -55,8 +57,3 @@ class LBP_core:
         yield (row - 1, col)
         yield (row - 1, col + 1)
 
-    def __cond_check__(self, img, p1, p2, current, binary_values):
-        if img[p1][p2] < current:
-            binary_values.append(0)
-        else:
-            binary_values.append(1)

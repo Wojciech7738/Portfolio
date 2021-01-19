@@ -119,7 +119,7 @@ class LocalBinaryPatterns(LBP_core):
         # Divide image into windows
         # image_size is (300, 200), but the real one is REVERSED (see cv2.resize function)
         img_size = self.image_size[::-1]
-        percentage = 0.2 # percentage of cropped image relative to its original size
+        percentage = 1.0 # percentage of cropped image relative to its original size
         counter = 0.2 # is added in every loop iteration
         i=0
         res = 0
@@ -184,8 +184,14 @@ class LocalBinaryPatterns(LBP_core):
 
         # plot images
         i= 1
-        for imagePath in paths.list_images('Images/Test'):
-            plt.subplot(6,5,i)
+        if path == 'Images/Test':
+            x = 6
+            y = 5
+        else:
+            x = 13
+            y = 12
+        for imagePath in paths.list_images(path):
+            plt.subplot(x,y,i)
             plt.imshow(self.__read_image__(imagePath))
 
             if not proba:
@@ -205,7 +211,8 @@ class LocalBinaryPatterns(LBP_core):
         images = []
         i = 1
         # new:
-        fig, ax = plt.subplots(4, 4)
+        fig, ax = plt.subplots(12, 13, figsize=(19.20,10.80))
+        fig.tight_layout()
         for imagePath in paths.list_images(directory):
             _, resp, img = self.predict_single_image(classifier, imagePath, threshold, RGB=RGB, use_sklearn=use_sklearn, proba=proba)
             predictions.append(resp)
@@ -218,11 +225,12 @@ class LocalBinaryPatterns(LBP_core):
 
             # new:
             ax[(i-1)%4, int((i-1)/4)].imshow(cv2.cvtColor(images[i-1], cv2.COLOR_BGR2RGB))
+            ax[(i - 1) % 4, int((i - 1) / 4)].axis('off')
 
             if predictions[i-1] == 0:
-                plt.title("Null")
+                ax[(i-1)%4, int((i-1)/4)].set_title('Null')
             else:
-                plt.title("Pyramid")
+                ax[(i-1)%4, int((i-1)/4)].set_title('Pyramid')
             i = i+1
         fig.savefig("RESULTS/"+fname+".png")
         plt.close(fig)
