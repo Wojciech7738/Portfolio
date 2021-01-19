@@ -119,7 +119,7 @@ class LocalBinaryPatterns(LBP_core):
         # Divide image into windows
         # image_size is (300, 200), but the real one is REVERSED (see cv2.resize function)
         img_size = self.image_size[::-1]
-        percentage = 1.0 # percentage of cropped image relative to its original size
+        percentage = 0.2 # percentage of cropped image relative to its original size
         counter = 0.2 # is added in every loop iteration
         i=0
         res = 0
@@ -127,7 +127,7 @@ class LocalBinaryPatterns(LBP_core):
             x = 0
             y = 0
             # TO REMOVE !!!
-            cr_img_size = (int(img_size[0]*int(percentage)), int(img_size[1]*int(percentage)))
+            cr_img_size = (int(img_size[0]*percentage), int(img_size[1]*percentage))
             while x < img_size[0] and y < img_size[1]:
                 i = i+1
                 cropped_image = image[x:cr_img_size[0]+x, y:cr_img_size[1]+y]
@@ -212,8 +212,8 @@ class LocalBinaryPatterns(LBP_core):
         images = []
         i = 0
         # new:
-        rows = 12
-        cols = 13
+        rows = 4
+        cols = 4
         fig, ax = plt.subplots(rows, cols, figsize=(19.20,10.80))
         fig.tight_layout()
         for imagePath in paths.list_images(directory):

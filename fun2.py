@@ -34,7 +34,7 @@ def tests(fname, RGB=False, proba=False, debug=False):
 
     # Test trained model
     begin = time.time()
-    print(LBP.advanced_predict_multiple_images(classifier, 0.59, fname, directory='Images/Train', RGB=RGB, proba=proba))  # takes very long time
+    print(LBP.advanced_predict_multiple_images(classifier, 0.59, fname, RGB=RGB, proba=proba))  # takes very long time
     end = time.time()
     print(end-begin)
 
