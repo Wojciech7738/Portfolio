@@ -1,27 +1,56 @@
 from lbp import LocalBinaryPatterns
-import sklearn.ensemble as se
+from sklearn.naive_bayes import GaussianNB
 import time
 import pickle
 import sys
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 def isRGB(RGB):
     if RGB:
-        return 'classifier_RGB.pkl'
+        return 'Bclassifier_RGB.pkl'
     else:
         return 'classifier.pkl'
 
+def is_ft_RGB(RGB):
+    if RGB:
+        return "RGB_features.pkl"
+    else:
+        return "features.pkl"
+
 def create_model(object, RGB=False):
     # extract an matrix of histograms and vector of classes
-    features, classes = object.extract_multiple_images('Images/Train', RGB=RGB)
+    # features, classes = object.extract_multiple_images('Images/Train', RGB=RGB)
+    # Load fetures and classes
+    filename = is_ft_RGB(RGB)
+    file = open(filename, 'rb')
+    features = pickle.load(file)
+    file.close()
+    file = open("classes.pkl", 'rb')
+    classes = pickle.load(file)
+    file.close()
+
     # Construct the strong classifier from image features (week classifiers)
-    model = se.AdaBoostClassifier(n_estimators=100, random_state=0)
+    # AdaBoost:
+    # model = se.AdaBoostClassifier(n_estimators=128, random_state=0)
+    # Naive Bayes
+    model = GaussianNB()
     model.fit(features, classes)
     # save model into file
     filename = isRGB(RGB)
     file = open(filename, 'wb')
     pickle.dump(model, file)
     file.close()
+
+    # filename = is_ft_RGB(RGB)
+    # file = open(filename, 'wb')
+    # pickle.dump(features, file)
+    # file.close()
+    # file = open("classes.pkl", 'wb')
+    # pickle.dump(classes, file)
+    # file.close()
 
 
 def tests(fname, RGB=False, proba=False, debug=False):
