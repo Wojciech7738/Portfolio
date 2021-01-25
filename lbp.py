@@ -18,7 +18,7 @@ class LocalBinaryPatterns(LBP_core):
         img = cv2.imread(imgPath)
         return cv2.resize(img, (416, 312))
 
-    def describe(self, IMG, RGB=False, use_sklearn=False):
+    def describe(self, IMG, RGB=False, use_sklearn=False, skip_norm=False):
         if RGB == True:
             i = 3
         else:
@@ -34,9 +34,12 @@ class LocalBinaryPatterns(LBP_core):
             else:
                 lbp = feature.local_binary_pattern(image, self.nPoints, self.radius_of_scanning)
                 hist, _ = np.histogram(lbp, bins=np.arange(0, 256, 1))
-            # normalize the histogram (values from 0 to 1)
-            hist = hist.astype("float")
-            hist = (hist-hist.min())/(hist.max()-hist.min())
+
+            if not skip_norm:
+                # normalize the histogram (values from 0 to 1)
+                hist = hist.astype("float")
+                hist = (hist-hist.min())/(hist.max()-hist.min())
+            # else: skip the normalization
 
             if j == 0:
                 Hist = hist
@@ -55,7 +58,7 @@ class LocalBinaryPatterns(LBP_core):
 
 
 
-    def extract_single_image(self, img, RGB=False, plot=False, use_sklearn=False):
+    def extract_single_image(self, img, RGB=False, plot=False, use_sklearn=False, skip_norm=False):
         LBP = None
         if RGB == False:
             method_name = "LBP"
@@ -65,14 +68,14 @@ class LocalBinaryPatterns(LBP_core):
 
         else:
             method_name = "RGB-LBP"
-            hist, LBP = self.describe(img, RGB=True, use_sklearn=use_sklearn)
+            hist, LBP = self.describe(img, RGB=True, use_sklearn=use_sklearn, skip_norm=skip_norm)
         # Show an image
         if plot:
             plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
             plt.show()
         return LBP, hist
 
-    def extract_multiple_images(self, path, RGB=False, use_prev_data=False, use_sklearn=False):
+    def extract_multiple_images(self, path, RGB=False, use_prev_data=False, use_sklearn=False, skip_norm=False):
         # Classes of images (0 if not given object, 1 otherwise)
         classes = []
         # Features - merged histograms
@@ -80,7 +83,7 @@ class LocalBinaryPatterns(LBP_core):
 
         # Compute histogram for every file in directory
         for imagePath in paths.list_images(path):
-            _, hist = self.extract_single_image(self.__read_image__(imagePath), RGB=RGB, use_sklearn=use_sklearn)
+            _, hist = self.extract_single_image(self.__read_image__(imagePath), RGB=RGB, use_sklearn=use_sklearn, skip_norm=skip_norm)
 
             # Create a list of classes (0 if there is "notpir" in filename)
             if not use_prev_data:
@@ -172,6 +175,8 @@ class LocalBinaryPatterns(LBP_core):
             if percentage >= 0.6:
                 counter = 0.4
 
+        plt.imshow(image)
+        plt.show()
         # if any is equal 1 - there is a pyramid on the image
         return responses, res, image
 
