@@ -129,7 +129,6 @@ class LocalBinaryPatterns(LBP_core):
         while percentage < 1.09:
             x = 0
             y = 0
-            # TO REMOVE !!!
             cr_img_size = (int(img_size[0]*percentage), int(img_size[1]*percentage))
             while x < img_size[0] and y < img_size[1]:
                 i = i+1
@@ -175,8 +174,6 @@ class LocalBinaryPatterns(LBP_core):
             if percentage >= 0.6:
                 counter = 0.4
 
-        plt.imshow(image)
-        plt.show()
         # if any is equal 1 - there is a pyramid on the image
         return responses, res, image
 
