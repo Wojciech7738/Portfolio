@@ -10,11 +10,11 @@ class MainWindow:
         self.empty_label2 = tkinter.Label(self.root_window, text=' ')
         self.empty_label3 = tkinter.Label(self.root_window, text=' ')
 
-        self.lbl = tkinter.Label(self.root_window, text='1. Choose a file', fg="blue", font=("Arial", 17))
+        self.lbl = tkinter.Label(self.root_window, text='1. Choose a file', fg="blue", font=("Arial", 17), justify='left')
         self.textlabel = tkinter.Entry(self.root_window)
         self.button_of_choice = tkinter.Button(self.root_window, text="Open...", command=self.read_file)
 
-        self.label = tkinter.Label(self.root_window, text='2. Choose the direction', fg="blue", font=("Arial", 17))
+        self.label = tkinter.Label(self.root_window, text='2. Choose the direction', fg="blue", font=("Arial", 17), justify='left')
         self.frame = tkinter.Frame(self.root_window)
         self.rot90 = tkinter.Button(self.frame, text="↻", command=lambda: self.change_degree(90))
         self.rot180 = tkinter.Button(self.frame, text="↕", command=lambda: self.change_degree(180))
