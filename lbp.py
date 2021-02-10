@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from imutils import paths
 from skimage import feature
 from lbp_core import LBP_core
+import os
 # from c_python.lbp_cy import LBP_core
 
 class LocalBinaryPatterns(LBP_core):
@@ -162,13 +163,13 @@ class LocalBinaryPatterns(LBP_core):
 
                 # It will be removed in the future
                 if debug:
+                    somestring = "DEBUG/"
+                    if not os.path.exists(somestring):
+                        os.mkdir(somestring, 0o777)
                     fig, ax = plt.subplots(1,1)
                     ax.imshow(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
-                    plt.title(str(responses[i-1]))
-                    somestring = "DEBUG/p2"
-                    if proba:
-                        somestring="DEBUG/p2/AAAAAAAAA"
-                    fig.savefig(somestring+imgPath[12:16]+str(i)+".png")
+                    ax.set_title(str(np.around(responses[i-1],4)))
+                    fig.savefig(somestring+str(i)+".png")
                     plt.close(fig)
             percentage = percentage + counter
             if percentage >= 0.6:
@@ -178,12 +179,12 @@ class LocalBinaryPatterns(LBP_core):
         return responses, res, image
 
 
-    def predict_multiple_images(self, classifier, path='Images/Test', RGB=False, proba=False):
-        features2, _ = self.extract_multiple_images(path, RGB=RGB, use_prev_data=True)
-        if not proba:
-            predictions = classifier.predict(features2)
-        else:
-            predictions = classifier.predict_proba(features2)
+    def predict_multiple_images(self, classifier, path='Images/Train', RGB=False, proba=False, use_sklearn=False):
+        features2, _ = self.extract_multiple_images(path, RGB=RGB, use_prev_data=True, use_sklearn=use_sklearn)
+        # if not proba:
+        predictions = classifier.predict(features2)
+        # else:
+        #     predictions = classifier.predict_proba(features2)
 
         # plot images
         i= 1
@@ -196,15 +197,17 @@ class LocalBinaryPatterns(LBP_core):
         for imagePath in paths.list_images(path):
             plt.subplot(x,y,i)
             plt.imshow(self.__read_image__(imagePath))
+            plt.axis('off')
 
-            if not proba:
-                if predictions[i-1] == 0:
-                    plt.title("Null")
-                else:
-                    plt.title("Pyramid")
-            else:
-                plt.title(str(predictions[i-1]))
+            # if not proba:
+            #     if predictions[i-1] == 0:
+            #         plt.title("Null")
+            #     else:
+            #         plt.title("Pyramid")
+            # else:
+            plt.title(str(np.around(predictions[i-1],2)))
             i = i+1
+        plt.tight_layout()
         plt.show()
         return predictions
 
@@ -219,14 +222,10 @@ class LocalBinaryPatterns(LBP_core):
         fig, ax = plt.subplots(rows, cols, figsize=(19.20,10.80))
         fig.tight_layout()
         for imagePath in paths.list_images(directory):
-            _, resp, img = self.predict_single_image(classifier, imagePath, threshold, RGB=RGB, use_sklearn=use_sklearn, proba=proba)
+            responses, resp, img = self.predict_single_image(classifier, imagePath, threshold, RGB=RGB, use_sklearn=use_sklearn, proba=proba)
             predictions.append(resp)
             images.append(img)
-
-            # plot images
-            # old:
-            # plt.subplot(4,4,i)
-            # plt.imshow(cv2.cvtColor(images[i-1], cv2.COLOR_BGR2RGB))
+            print(f"Image {i}: {responses}")
 
             # new:
             ax[int(i/cols), i%cols].imshow(cv2.cvtColor(images[i], cv2.COLOR_BGR2RGB))
