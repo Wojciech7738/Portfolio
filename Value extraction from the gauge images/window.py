@@ -60,41 +60,25 @@ class Window:
         self.displayed_image2 = ImageTk.PhotoImage(self.img2)
 
         # Frames
-        top_frame1 = tk.Frame(self.__master)
-        top_frame1.grid(row=0, column=0)
-        top_frame2 = tk.Frame(self.__master)
-        top_frame2.grid(row=0, column=1)
-        center_frame1 = tk.Frame(self.__master)
-        center_frame1.grid(row=1, column=0)
-        center_frame2 = tk.Frame(self.__master)
-        center_frame2.grid(row=1, column=1)
-        bottom_frame1 = tk.Frame(self.__master)
-        bottom_frame1.grid(row=2, column=0)
-        bottom_frame2 = tk.Frame(self.__master)
-        bottom_frame2.grid(row=2, column=1)
-        hell_frame1 = tk.Frame(self.__master)
-        hell_frame1.grid(row=3, column=0)
-        hell_frame2 = tk.Frame(self.__master)
-        hell_frame2.grid(row=3, column=1)
-        hell_frame3 = tk.Frame(self.__master)
-        hell_frame3.grid(row=4, column=0)
-        hell_frame4 = tk.Frame(self.__master)
-        hell_frame4.grid(row=4, column=1)
+        frames = []
+        for i in range(10):
+            frames.append(tk.Frame(self.__master))
+            frames[i].grid(row=int(np.floor(i/2)), column=i%2)
 
         # Buttons for searching pictures
-        button_search_pics1 = tk.Button(top_frame1, text="Open...",
+        button_search_pics1 = tk.Button(frames[0], text="Open...",
                                         command=lambda: self.open_file(self.__open_file1__, self.displayed_image,
                                                                        self.__imgLabel__))
         button_search_pics1.pack()
-        button_search_pics2 = tk.Button(top_frame2, text="Open...",
+        button_search_pics2 = tk.Button(frames[1], text="Open...",
                                         command=lambda: self.open_file(self.__open_file2__, self.displayed_image2,
                                                                        self.__imgLabel2__))
         button_search_pics2.pack(side=tk.LEFT)
-        button_camera = tk.Button(top_frame2, text="Read image from camera", command=self.read_camera)
+        button_camera = tk.Button(frames[1], text="Read image from camera", command=self.read_camera)
         button_camera.pack(side=tk.LEFT)
 
         # Widget with an image (in center frames)
-        self.__imgLabel__ = tk.Canvas(center_frame1, width=X, height=Y)
+        self.__imgLabel__ = tk.Canvas(frames[2], width=X, height=Y)
         self.__imgLabel__.pack()
         self.__imgLabel__.bind("<Button-1>",
                            lambda k: self.__draw_rectangle(k, self.__imgLabel__, self.img, self.displayed_image,
@@ -109,7 +93,7 @@ class Window:
         # Display an image
         self.__imgLabel__.create_image(20, 20, anchor=tk.NW, image=self.displayed_image)
 
-        self.__imgLabel2__ = tk.Canvas(center_frame2, width=X, height=Y)
+        self.__imgLabel2__ = tk.Canvas(frames[3], width=X, height=Y)
         self.__imgLabel2__.pack()
         self.__imgLabel2__.bind("<Button-1>",
                             lambda k: self.__draw_rectangle(k, self.__imgLabel2__, self.img2, self.displayed_image2,
@@ -126,7 +110,7 @@ class Window:
 
         # A buttons for changing the size of the image etc (in bottom frames)
         # Left side
-        button = tk.Button(bottom_frame1, text="Change size",
+        button = tk.Button(frames[4], text="Change size",
                            command=lambda: self.change_size(self.__change_size1__, self.displayed_image, self.__imgLabel__,
                                                             self.mouse_positions1))
         button.pack(side=tk.LEFT)
@@ -135,24 +119,24 @@ class Window:
         # Color Balance algorithm
         # List of algorithms
         self.alg_names = {'Max White': 0, 'Grey World': 1, 'ACE': 2}
-        buttonCB1 = tk.Button(bottom_frame1, text="Color Balance",
+        buttonCB1 = tk.Button(frames[4], text="Color Balance",
                               command=lambda: self.color_balance(self.__imgLabel__, self.__user_choice1__, self.img,
                                                                  self.displayed_image))
         buttonCB1.pack(side=tk.LEFT)
         # Display list of algorithms
         self.__var__ = tk.StringVar()
         self.__var__.set("Max White")
-        CB_alg_button1 = tk.OptionMenu(bottom_frame1, self.__var__, *self.alg_names,
+        CB_alg_button1 = tk.OptionMenu(frames[4], self.__var__, *self.alg_names,
                                        command=lambda k: self.__display_algorithm1__(k, self.__var__))
         CB_alg_button1.pack(side=tk.LEFT)
 
         # Right side
-        button2 = tk.Button(bottom_frame2, text="Change size",
+        button2 = tk.Button(frames[5], text="Change size",
                             command=lambda: self.change_size(self.__change_size2__, self.displayed_image2, self.__imgLabel2__,
                                                              self.mouse_positions2))
         button2.pack(side=tk.LEFT)
         self.__user_choice2__ = 0
-        buttonCB = tk.Button(bottom_frame2, text="Color Balance",
+        buttonCB = tk.Button(frames[5], text="Color Balance",
                              command=lambda: self.color_balance(self.__imgLabel2__, self.__user_choice2__, self.img2,
                                                                 self.displayed_image2))
         buttonCB.pack(side=tk.LEFT)
@@ -160,38 +144,38 @@ class Window:
         # List of algorithms
         self.__var2__ = tk.StringVar()
         self.__var2__.set("Max White")
-        CB_alg_button = tk.OptionMenu(bottom_frame2, self.__var2__, *self.alg_names,
+        CB_alg_button = tk.OptionMenu(frames[5], self.__var2__, *self.alg_names,
                                       command=lambda k: self.__display_algorithm2__(k, self.__var2__))
         CB_alg_button.pack(side=tk.LEFT)
 
         # Perspective transform buttons
-        self.__button_perspective1__ = tk.Button(bottom_frame1, text="Perspective transform",
+        self.__button_perspective1__ = tk.Button(frames[4], text="Perspective transform",
                                              command=lambda: self.perspectiveTransform(self.img, self.displayed_image,
                                                                                        self.__imgLabel__))
         self.__button_perspective1__.pack(side=tk.LEFT)
-        self.__button_perspective2__ = tk.Button(bottom_frame2, text="Perspective transform",
+        self.__button_perspective2__ = tk.Button(frames[5], text="Perspective transform",
                                             command=lambda: self.perspectiveTransform(self.img2, self.displayed_image2,
                                                                                       self.__imgLabel2__))
         self.__button_perspective2__.pack(side=tk.LEFT)
 
         # Show differences between two images (in hell_frame)
-        buttonSD = tk.Button(hell_frame1, text="Show differences", command=self.show_differences)
+        buttonSD = tk.Button(frames[6], text="Show differences", command=self.show_differences)
         buttonSD.pack(side=tk.LEFT)
         # Search for digits
-        button_digi = tk.Button(hell_frame1, text="Find digits", command=lambda: self.detect_digits(image_name))
+        button_digi = tk.Button(frames[6], text="Find digits", command=lambda: self.detect_digits(image_name))
         button_digi.pack(side=tk.LEFT)
 
         # Buttons for restoring images and the field of comparison
-        button_restore_img = tk.Button(hell_frame1, text="Restore images",
+        button_restore_img = tk.Button(frames[6], text="Restore images",
                                        command=lambda: self.restore_images(self.orig_img1, self.orig_img2))
         button_restore_img.pack()
-        button_restore_area = tk.Button(hell_frame2, text="Reset comparison area", command=self.restore_area)
+        button_restore_area = tk.Button(frames[7], text="Reset comparison area", command=self.restore_area)
         button_restore_area.pack(side=tk.LEFT)
 
         # Button for mode choosing
         self.__text__ = tk.StringVar()
         self.__text__.set("Size changing")
-        button_area = tk.Button(hell_frame2, textvariable=self.__text__, command=self.set_comp_area)
+        button_area = tk.Button(frames[7], textvariable=self.__text__, command=self.set_comp_area)
         button_area.pack(side=tk.LEFT)
 
     # Two variables with the same value have the same address. If I use c_types, the compare operation and
@@ -395,29 +379,19 @@ class Window:
                 cv2.drawContours(mask, [c], 0, (0, 255, 0), -1)
                 cv2.drawContours(filled_after, [c], 0, (0, 255, 0), -1)
 
+        ___images = [img1, img2, diff, mask, filled_after]
+        ___titles = ['Image 1', 'Image 2', 'diff', 'mask', 'filled after']
         if not self.mat_plot_lib:
-            cv2.imshow('Image 1', img1)
-            cv2.imshow('Image 2', img2)
-            cv2.imshow('diff', diff)
-            cv2.imshow('mask', mask)
-            cv2.imshow('filled after', filled_after)
+            for i in range(len(___images)):
+                cv2.imshow(___titles[i], ___images[i])
             cv2.waitKey()
-            cv2.destroyWindow('Image 1')
-            cv2.destroyWindow('Image 2')
-            cv2.destroyWindow('diff')
-            cv2.destroyWindow('mask')
-            cv2.destroyWindow('filled after')
+            for i in range(len(___images)):
+                cv2.destroyWindow(___titles[i])
         else:
-            plt.subplot(2, 3, 1)
-            plt.imshow(img1)
-            plt.subplot(2, 3, 2)
-            plt.imshow(img2)
-            plt.subplot(2, 3, 3)
-            plt.imshow(diff)
-            plt.subplot(2, 3, 4)
-            plt.imshow(mask)
-            plt.subplot(2, 3, 5)
-            plt.imshow(filled_after)
+            for i in range(len(___images)):
+                plt.subplot(2, 3, i+1)
+                plt.title(___titles[i])
+                plt.imshow(___images[i])
             plt.show()
 
     def open_file(self, function, displayed_image, imgLabel, repeat=False):

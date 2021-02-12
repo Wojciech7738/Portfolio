@@ -49,7 +49,7 @@ class TKWindow(object):
 
                 # Make the label ignoring mouse click
                 self.locked = True
-                apply = tk.messagebox.askyesno("Applied transform", "Apply changes?")
+                apply = tk.messagebox.askyesno("Applied transform", "Apply changes?", parent=self.master)
                 self.locked = False
                 if not apply:
                     self.warped = self.image
