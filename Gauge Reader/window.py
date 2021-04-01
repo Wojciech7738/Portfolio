@@ -9,6 +9,7 @@ import colorcorrect.util as ccu
 import matplotlib.pyplot as plt
 import os
 import Train.test as te
+from analog_read import Gauge_Reader
 import perspective_transform_module as pt
 
 
@@ -162,7 +163,7 @@ class Window:
         buttonSD = tk.Button(frames[6], text="Show differences", command=self.show_differences)
         buttonSD.pack(side=tk.LEFT)
         # Search for digits
-        button_digi = tk.Button(frames[6], text="Find digits", command=lambda: self.detect_digits(image_name))
+        button_digi = tk.Button(frames[6], text="Read gauge values", command=lambda: self.read_gauge(np.asarray(self.img)))
         button_digi.pack(side=tk.LEFT)
 
         # Buttons for restoring images and the field of comparison
@@ -292,6 +293,7 @@ class Window:
             image.paste(orig_image.copy())
             self.__paste_image__(image, displayed_image, imgLabel)
 
+    # Not used
     def detect_digits(self, filename):
         if not self.__images_exists():
             return
@@ -307,6 +309,10 @@ class Window:
         img = self.__blurring__(img)
         te.Main(img, os.getcwd(), 1)
         # te.Main(filename)
+
+    def read_gauge(self, img):
+        gr = Gauge_Reader()
+        gr.estimate_gauge(img)
 
     def perspectiveTransform(self, image, disp_img, imgLabel):
         if not self.__images_exists(1):
