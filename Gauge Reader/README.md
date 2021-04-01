@@ -58,11 +58,11 @@ In order to select the comparison area, press Button 11 to swich into proper mod
 ![The comparison area selection.](https://user-images.githubusercontent.com/45498344/113295798-f121c900-92f8-11eb-8dc8-5b222e1365d2.png)
 
 Now you can press Button 7 to find differences between images.
-
+<p align="center">
 ![Result of the comparison operation.](https://user-images.githubusercontent.com/45498344/113295959-27f7df00-92f9-11eb-85f7-96a3f73146c5.png)
 
 ![From left to right: first image with marked differences, second image, matrix of differences, mask of this matrix and mask imposed into second image.](https://user-images.githubusercontent.com/45498344/113296039-4067f980-92f9-11eb-8ae0-fd2ed37c2ab0.png)
-
+</p>
 You can also use Button 8 in order to read the values of the gauges.
 
 
